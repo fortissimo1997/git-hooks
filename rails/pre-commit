@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# This script will prevent you from committing js.yml files
+# when translations.js files are not staged.
+# This may be useful if you use 'i18n-js' gems.
+
+js_yaml=`git diff --cached --name-only --diff-filter=AM | grep 'config/locales/javascripts/'`
+if [ "$js_yaml" = "" ]
+then
+  exit 0
+fi
+arr=("$js_yaml")
+for yaml in $arr
+do
+  lang=`echo $yaml|sed -e 's/^config\/locales\/javascripts\/js\.\(.\+\)\.yml$/\1/'`
+  js=`git diff --cached --name-only --diff-filter=AM | grep "public/javascripts/translations-$lang.js"`
+  if [ "$js" = "" ]
+  then
+    flag="abort"
+    echo "translations-$lang.js should be up-to-date!"
+  fi
+done
+if [ "$flag" = "abort" ]
+then
+  echo "Do 'rake i18n:js:export' and add translations JS'"
+  exit 1
+fi
