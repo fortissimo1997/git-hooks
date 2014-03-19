@@ -2,14 +2,12 @@
 # Add ticket number Of Backlog DEV Team from branch
 # if message has no ticket numbers.
 
-ticket=`git branch | grep "*" | awk '{print $2}' | sed -e "s/^\(DEV\-[0-9]\+\).*/\1/g"`
-if expr $ticket : "^DEV\-[0-9]\+" ; then
-    ticket_line=`egrep "^[^#]*DEV\-[0-9]+.*" $1`
-    if [ "$ticket_line" == "" ] ; then
-        echo "No Ticket. Add ticket $ticket to the commit message."
-        mv $1 $1.tmp
-        echo -n "$ticket " > $1
-        cat $1.tmp >> $1
-        rm $1.tmp
-    fi
+if [ -n "${GIT_DIR}" ]; then
+  hooksdir="./${GIT_DIR}/hooks/"
+else
+  hooksdir="./"
 fi
+
+. "${hooksdir}common.sh"
+
+appendTicketNumberToCommitMessage $1
